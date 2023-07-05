@@ -11,6 +11,16 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// rand_unif
+double rand_unif();
+RcppExport SEXP _spBART7_rand_unif() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(rand_unif());
+    return rcpp_result_gen;
+END_RCPP
+}
 // log_dmvn
 double log_dmvn(arma::vec& x, arma::mat& Sigma);
 RcppExport SEXP _spBART7_log_dmvn(SEXP xSEXP, SEXP SigmaSEXP) {
@@ -189,18 +199,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rand_unif
-double rand_unif();
-RcppExport SEXP _spBART7_rand_unif() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rand_unif());
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_spBART7_rand_unif", (DL_FUNC) &_spBART7_rand_unif, 0},
     {"_spBART7_log_dmvn", (DL_FUNC) &_spBART7_log_dmvn, 2},
     {"_spBART7_sum_exclude_col", (DL_FUNC) &_spBART7_sum_exclude_col, 2},
     {"_spBART7_bspline", (DL_FUNC) &_spBART7_bspline, 2},
@@ -214,7 +215,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_spBART7_rMVN2", (DL_FUNC) &_spBART7_rMVN2, 2},
     {"_spBART7_rMVNslow", (DL_FUNC) &_spBART7_rMVNslow, 2},
     {"_spBART7_matrix_mat", (DL_FUNC) &_spBART7_matrix_mat, 1},
-    {"_spBART7_rand_unif", (DL_FUNC) &_spBART7_rand_unif, 0},
     {NULL, NULL, 0}
 };
 

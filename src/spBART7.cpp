@@ -608,7 +608,7 @@ void grow(Node* tree, modelParam &data, arma::vec &curr_res, int &t){
         }
 
         // Avoiding nodes lower than the node_min
-        if((g_node->left->n_leaf<5) || (g_node->right->n_leaf<5) ){
+        if((g_node->left->n_leaf<25) || (g_node->right->n_leaf<25) ){
 
                 // cout << " NODES" << endl;
                 // Returning to the old values
@@ -647,8 +647,6 @@ void grow(Node* tree, modelParam &data, arma::vec &curr_res, int &t){
 
         // Keeping the new tree or not
         if(arma::randi(arma::distr_param(0.0,1.0)) < acceptance){
-                // Do nothing just keep the new tree
-                // cout << " ACCEPTED" << endl;
 
                 // This information is going to mark that terminal node has the split as one ancestor;
                 g_node->left->ancestors(g_node->var_split)++;
@@ -688,14 +686,9 @@ void prune(Node* tree, modelParam&data, arma::vec &curr_res, int &t){
         // Selecting one node to be sampled
         Node* p_node = sample_node(nog_nodes);
 
-
-        // Calculate current tree log likelihood
-        double tree_log_like = 0;
-
         // Calculating the whole likelihood fo the tree
         for(int i = 0; i < t_nodes.size(); i++){
                 t_nodes[i]->splineNodeLogLike(data, curr_res, t);
-                tree_log_like = tree_log_like + t_nodes[i]->log_likelihood;
         }
 
         // cout << "Error C1" << endl;
@@ -704,7 +697,7 @@ void prune(Node* tree, modelParam&data, arma::vec &curr_res, int &t){
         // cout << "Error C2" << endl;
 
         // Getting the loglikelihood of the new tree
-        double new_tree_log_like = tree_log_like + p_node->log_likelihood - (p_node->left->log_likelihood + p_node->right->log_likelihood);
+        double new_tree_log_like =  p_node->log_likelihood - (p_node->left->log_likelihood + p_node->right->log_likelihood);
 
         // Calculating the transition loglikelihood
         double transition_loglike = log((0.3)/(t_nodes.size())) - log((0.3)/(nog_nodes.size()));
@@ -718,7 +711,7 @@ void prune(Node* tree, modelParam&data, arma::vec &curr_res, int &t){
 
 
         // Calculating the acceptance
-        double acceptance = exp(new_tree_log_like - tree_log_like + transition_loglike + tree_prior);
+        double acceptance = exp(new_tree_log_like + transition_loglike + tree_prior);
 
         if(arma::randu(arma::distr_param(0.0,1.0))<acceptance){
                 p_node->deletingLeaves();
@@ -739,6 +732,10 @@ void change(Node* tree, modelParam &data, arma::vec &curr_res, int &t){
         std::vector<Node*> t_nodes = leaves(tree) ;
         std::vector<Node*> nog_nodes = nogs(tree);
 
+        if(t_nodes.size()==1){
+             t_nodes[0]->splineNodeLogLike(data,curr_res,t);
+             return;
+        }
         // Selecting one node to be sampled
         Node* c_node = sample_node(nog_nodes);
 
@@ -779,7 +776,7 @@ void change(Node* tree, modelParam &data, arma::vec &curr_res, int &t){
         int old_left_n_leaf = c_node->left->n_leaf;
 
         // Storing old left ancestors
-        arma::vec old_left_ancestors = c_node->left->train_index;
+        arma::vec old_left_ancestors = c_node->left->ancestors;
 
         // Storing all of the old loglikelihood from right;
         double old_right_log_like = c_node->right->log_likelihood;
@@ -795,7 +792,7 @@ void change(Node* tree, modelParam &data, arma::vec &curr_res, int &t){
         int old_right_n_leaf = c_node->right->n_leaf;
 
         // Storing old right ancestors
-        arma::vec old_right_ancestors = c_node->right->train_index;
+        arma::vec old_right_ancestors = c_node->right->ancestors;
 
         // Storing test observations
         arma::vec old_left_test_index = c_node->left->test_index;
@@ -877,7 +874,7 @@ void change(Node* tree, modelParam &data, arma::vec &curr_res, int &t){
         }
 
 
-        if((c_node->left->n_leaf<5) || (c_node->right->n_leaf)<5){
+        if((c_node->left->n_leaf<25) || (c_node->right->n_leaf)<25){
 
                 // Returning to the previous values
                 c_node->var_split = old_var_split;
@@ -1765,7 +1762,7 @@ Rcpp::List sbart(arma::mat x_train,
                 // updateTauBintercept(all_forest,data,a_tau_b,d_tau_b);
 
                 // std::cout << "Error Delta: " << data.delta << endl;
-                updateDelta(data);
+                // updateDelta(data);
                 // std::cout << "Error Tau: " << data.tau<< endl;
                 updateTau(prediction_train_sum, data);
 
